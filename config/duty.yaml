@@ -1,0 +1,13 @@
+---
+routes:
+  - endpoint: "/v1/foo"
+    response:
+      code: 200
+      payload: "foo.json"
+  - endpoint: "/v1/bar"
+    response:
+      code: 401
+      payload: "unauthorized.json"
+  - endpoint: "/v1/baz"
+    response:
+      code: 401
