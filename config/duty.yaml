@@ -11,3 +11,15 @@ routes:
   - endpoint: "/v1/baz"
     response:
       code: 401
+  - endpoint: "/v1/static"
+    type: "static"
+    response:
+      code: 200
+      payload: "foo.json"
+  - endpoint: "/v1/ordinal"
+    type: "ordinal"
+    responses:
+      - code: 200
+        payload: "foo.json"
+      - code: 401
+        payload: "unauthorized.json"
