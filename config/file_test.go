@@ -23,7 +23,7 @@ func TestConfig(t *testing.T) {
 				c, err := ParseFromFile()
 				Expect(err).To(BeNil())
 
-				Expect(len(c.Routes)).To(Equal(5))
+				Expect(len(c.Routes)).To(Equal(6))
 				Expect(c.Status).NotTo(Equal(""))
 				Expect(c.Routes[0].Response.Code).To(BeNumerically(">", 0))
 				Expect(c.Routes[0].Response.Payload).NotTo(Equal(""))

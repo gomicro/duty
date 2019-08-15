@@ -36,11 +36,13 @@ func (r *Route) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		b, err = ioutil.ReadFile(r.Responses[i].Payload)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
-			return
+		if r.Responses[i].Payload != "" {
+			b, err = ioutil.ReadFile(r.Responses[i].Payload)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
+				return
+			}
 		}
 
 		code = r.Responses[i].Code
@@ -49,11 +51,13 @@ func (r *Route) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			r.index++
 		}
 	default:
-		b, err = ioutil.ReadFile(r.Response.Payload)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
-			return
+		if r.Response.Payload != "" {
+			b, err = ioutil.ReadFile(r.Response.Payload)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
+				return
+			}
 		}
 
 		code = r.Response.Code
