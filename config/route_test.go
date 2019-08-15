@@ -78,6 +78,29 @@ func TestRoute(t *testing.T) {
 
 				Expect(firstb).To(Equal(secondb))
 			})
+
+			g.It("should return a response code for an endpoint with no response defined", func() {
+				f, _ := ParseFromFile()
+
+				server := httptest.NewServer(f)
+				defer server.Close()
+
+				u := fmt.Sprintf("%v%v", server.URL, "/v1/baz")
+
+				res, err := http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				Expect(res.StatusCode).To(Equal(401))
+
+				u = fmt.Sprintf("%v%v", server.URL, "/v1/biz")
+
+				res, err = http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				Expect(res.StatusCode).To(Equal(200))
+			})
 		})
 
 		g.Describe("Oridinal", func() {

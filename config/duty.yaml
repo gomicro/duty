@@ -11,6 +11,9 @@ routes:
   - endpoint: "/v1/baz"
     response:
       code: 401
+  - endpoint: "/v1/biz"
+    response:
+      code: 200
   - endpoint: "/v1/static"
     type: "static"
     response:
