@@ -66,3 +66,8 @@ func (r *Route) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(code)
 	w.Write(b)
 }
+
+// Reset returns the internal index of the route to 0
+func (r *Route) Reset() {
+	r.index = 0
+}

@@ -143,6 +143,63 @@ func TestRoute(t *testing.T) {
 				Expect(string(firstb)).NotTo(Equal(string(thirdb)))
 				Expect(string(secondb)).To(Equal(string(thirdb)))
 			})
+
+			g.It("should reset an ordinal route", func() {
+				f, _ := ParseFromFile()
+
+				server := httptest.NewServer(f)
+				defer server.Close()
+
+				u := fmt.Sprintf("%v%v", server.URL, "/v1/ordinal")
+
+				res, err := http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				firstb, err := ioutil.ReadAll(res.Body)
+				Expect(err).To(BeNil())
+				Expect(string(firstb)).To(ContainSubstring("here lies a foo"))
+				Expect(string(firstb)).To(ContainSubstring("git to the bar"))
+				Expect(string(firstb)).To(ContainSubstring("let's get the baz back together"))
+
+				res, err = http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				secondb, err := ioutil.ReadAll(res.Body)
+				Expect(err).To(BeNil())
+				Expect(string(secondb)).To(ContainSubstring("unauthorized"))
+
+				Expect(string(firstb)).NotTo(Equal(string(secondb)))
+
+				r := fmt.Sprintf("%v%v", server.URL, "/duty/reset")
+				http.Get(r)
+
+				res, err = http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				thirdb, err := ioutil.ReadAll(res.Body)
+				Expect(err).To(BeNil())
+				Expect(string(thirdb)).To(ContainSubstring("here lies a foo"))
+				Expect(string(thirdb)).To(ContainSubstring("git to the bar"))
+				Expect(string(thirdb)).To(ContainSubstring("let's get the baz back together"))
+
+				Expect(string(firstb)).To(Equal(string(thirdb)))
+				Expect(string(secondb)).NotTo(Equal(string(thirdb)))
+
+				res, err = http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				fourthb, err := ioutil.ReadAll(res.Body)
+				Expect(err).To(BeNil())
+				Expect(string(fourthb)).To(ContainSubstring("unauthorized"))
+
+				Expect(string(firstb)).NotTo(Equal(string(fourthb)))
+				Expect(string(secondb)).To(Equal(string(fourthb)))
+				Expect(string(thirdb)).NotTo(Equal(string(fourthb)))
+			})
 		})
 	})
 }
