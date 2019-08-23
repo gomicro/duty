@@ -12,6 +12,7 @@ import (
 
 const (
 	defaultStatusEndpoint = "/duty/status"
+	defaultResetEndpoint  = "/duty/reset"
 	defaultConfigFile     = "./duty.yaml"
 
 	configFileEnv = "DUTY_CONFIG_FILE"
@@ -22,6 +23,7 @@ type File struct {
 	Routes    []Route           `yaml:"routes"`
 	routesMap map[string]*Route `yaml:"-"`
 	Status    string            `yaml:"status"`
+	Reset     string            `yaml:"reset"`
 }
 
 // ParseFromFile reads an Duty config file from the file specified in the
@@ -50,6 +52,10 @@ func ParseFromFile() (*File, error) {
 		conf.Status = defaultStatusEndpoint
 	}
 
+	if conf.Reset == "" {
+		conf.Reset = defaultResetEndpoint
+	}
+
 	conf.routesMap = make(map[string]*Route)
 	for i, r := range conf.Routes {
 		conf.routesMap[r.Endpoint] = &conf.Routes[i]
@@ -61,6 +67,15 @@ func ParseFromFile() (*File, error) {
 func (f *File) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == f.Status {
 		handleStatus(w, r)
+		return
+	}
+
+	if r.URL.Path == f.Reset {
+		for k := range f.routesMap {
+			f.routesMap[k].Reset()
+		}
+
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
