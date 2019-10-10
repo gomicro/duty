@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	. "github.com/franela/goblin"
+	"github.com/gomicro/ledger"
+	"github.com/gomicro/penname"
 	. "github.com/onsi/gomega"
 )
 
@@ -18,6 +20,11 @@ func TestConfig(t *testing.T) {
 	RegisterFailHandler(func(m string, _ ...int) { g.Fail(m) })
 
 	g.Describe("Config File", func() {
+		g.Before(func() {
+			mw := penname.New()
+			log = ledger.New(mw, ledger.DebugLevel)
+		})
+
 		g.Describe("Parsing from file", func() {
 			g.It("should parse a default config file", func() {
 				c, err := ParseFromFile()
