@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/gomicro/ledger"
 	"gopkg.in/yaml.v2"
 )
 
@@ -18,12 +19,20 @@ const (
 	configFileEnv = "DUTY_CONFIG_FILE"
 )
 
+var (
+	log *ledger.Ledger
+)
+
 // File represents all the configurable options of Duty
 type File struct {
 	Routes    []Route           `yaml:"routes"`
 	routesMap map[string]*Route `yaml:"-"`
 	Status    string            `yaml:"status"`
 	Reset     string            `yaml:"reset"`
+}
+
+func init() {
+	log = ledger.New(os.Stdout, ledger.DebugLevel)
 }
 
 // ParseFromFile reads an Duty config file from the file specified in the
@@ -71,6 +80,8 @@ func (f *File) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Path == f.Reset {
+		log.Debug("resetting endpoints")
+
 		for k := range f.routesMap {
 			f.routesMap[k].Reset()
 		}
@@ -81,6 +92,7 @@ func (f *File) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	route, found := f.getRoute(r.URL)
 	if !found {
+		log.Errorf("route not found for url path: %v", r.URL)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("path not found"))
 		return
