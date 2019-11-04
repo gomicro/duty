@@ -4,4 +4,5 @@ package config
 type Response struct {
 	Code    int    `yaml:"code"`
 	Payload string `yaml:"payload"`
+	ID      string `yaml:"id"`
 }

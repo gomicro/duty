@@ -201,5 +201,93 @@ func TestRoute(t *testing.T) {
 				Expect(string(thirdb)).NotTo(Equal(string(fourthb)))
 			})
 		})
+
+		g.Describe("Variable", func() {
+			g.It("should return variable content for an variable route", func() {
+				f, _ := ParseFromFile()
+
+				server := httptest.NewServer(f)
+				defer server.Close()
+
+				u := fmt.Sprintf("%v%v", server.URL, "/v1/variable")
+
+				res, err := http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				firstb, err := ioutil.ReadAll(res.Body)
+				Expect(err).To(BeNil())
+				Expect(string(firstb)).To(ContainSubstring("here lies a foo"))
+				Expect(string(firstb)).To(ContainSubstring("git to the bar"))
+				Expect(string(firstb)).To(ContainSubstring("let's get the baz back together"))
+
+			})
+
+			g.It("should not increment index each time", func() {
+				f, _ := ParseFromFile()
+
+				server := httptest.NewServer(f)
+				defer server.Close()
+
+				u := fmt.Sprintf("%v%v", server.URL, "/v1/variable")
+
+				res, err := http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				res, err = http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				firstb, err := ioutil.ReadAll(res.Body)
+				Expect(err).To(BeNil())
+				Expect(string(firstb)).To(ContainSubstring("here lies a foo"))
+				Expect(string(firstb)).To(ContainSubstring("git to the bar"))
+				Expect(string(firstb)).To(ContainSubstring("let's get the baz back together"))
+			})
+
+			g.It("should set a variable route to id 404 and not reset after", func() {
+				f, _ := ParseFromFile()
+
+				server := httptest.NewServer(f)
+				defer server.Close()
+
+				r := fmt.Sprintf("%v%v", server.URL, "/duty/set?name=var&id=404")
+				res, err := http.Get(r)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				u := fmt.Sprintf("%v%v", server.URL, "/v1/variable")
+				res, err = http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+				Expect(res.StatusCode).To(Equal(404))
+
+				u = fmt.Sprintf("%v%v", server.URL, "/v1/variable")
+				res, err = http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+				Expect(res.StatusCode).To(Equal(404))
+
+			})
+
+			g.It("should set a variable route to id 401", func() {
+				f, _ := ParseFromFile()
+
+				server := httptest.NewServer(f)
+				defer server.Close()
+
+				r := fmt.Sprintf("%v%v", server.URL, "/duty/set?name=var&id=401")
+				res, err := http.Get(r)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				u := fmt.Sprintf("%v%v", server.URL, "/v1/variable")
+				res, err = http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+				Expect(res.StatusCode).To(Equal(401))
+			})
+		})
 	})
 }

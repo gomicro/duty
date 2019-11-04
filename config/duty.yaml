@@ -26,3 +26,17 @@ routes:
         payload: "foo.json"
       - code: 401
         payload: "unauthorized.json"
+  - endpoint: "/v1/variable"
+    type: "variable"
+    name: "var"
+    responses:
+      - code: 200
+        payload: "foo.json"
+        id: "200"
+      - code: 401
+        payload: "unauthorized.json"
+        id: "401"
+      - code: 404
+        payload: "notfound.json"
+        id: "404"
+      
