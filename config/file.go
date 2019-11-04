@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -13,6 +14,7 @@ import (
 const (
 	defaultStatusEndpoint = "/duty/status"
 	defaultResetEndpoint  = "/duty/reset"
+	defaultSetEndpoint    = "/duty/set"
 	defaultConfigFile     = "./duty.yaml"
 
 	configFileEnv = "DUTY_CONFIG_FILE"
@@ -24,6 +26,7 @@ type File struct {
 	routesMap map[string]*Route `yaml:"-"`
 	Status    string            `yaml:"status"`
 	Reset     string            `yaml:"reset"`
+	Set       string            `yaml:"set"`
 }
 
 // ParseFromFile reads an Duty config file from the file specified in the
@@ -56,6 +59,10 @@ func ParseFromFile() (*File, error) {
 		conf.Reset = defaultResetEndpoint
 	}
 
+	if conf.Set == "" {
+		conf.Set = defaultSetEndpoint
+	}
+
 	conf.routesMap = make(map[string]*Route)
 	for i, r := range conf.Routes {
 		conf.routesMap[r.Endpoint] = &conf.Routes[i]
@@ -73,6 +80,18 @@ func (f *File) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == f.Reset {
 		for k := range f.routesMap {
 			f.routesMap[k].Reset()
+		}
+
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if strings.Contains(r.URL.Path, "/set") {
+
+		queryValues := r.URL.Query()
+
+		for k := range f.routesMap {
+			f.routesMap[k].Set(queryValues.Get("name"), queryValues.Get("id"))
 		}
 
 		w.WriteHeader(http.StatusOK)
