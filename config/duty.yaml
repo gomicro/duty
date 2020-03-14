@@ -4,21 +4,26 @@ routes:
     response:
       code: 200
       payload: "foo.json"
+
   - endpoint: "/v1/bar"
     response:
       code: 401
       payload: "unauthorized.json"
+
   - endpoint: "/v1/baz"
     response:
       code: 401
+
   - endpoint: "/v1/biz"
     response:
       code: 200
+
   - endpoint: "/v1/static"
     type: "static"
     response:
       code: 200
       payload: "foo.json"
+
   - endpoint: "/v1/ordinal"
     type: "ordinal"
     responses:
@@ -26,6 +31,7 @@ routes:
         payload: "foo.json"
       - code: 401
         payload: "unauthorized.json"
+
   - endpoint: "/v1/variable"
     type: "variable"
     name: "var"

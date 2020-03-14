@@ -25,81 +25,107 @@ type Route struct {
 
 func (r *Route) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "OPTIONS" {
-		log.Info("responding with cors headers for options request")
-
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "*, Authorization")
-		w.Header().Set("Access-Control-Max-Age", "60")
-		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0")
-		w.Header().Set("Vary", "Accept-Encoding")
-		w.WriteHeader(http.StatusNoContent)
-
+		r.handleCORS(w, req)
 		return
 	}
 
-	var b []byte
-	var code int
-	var err error
-
 	switch strings.ToLower(r.Type) {
 	case ordinalRouteType:
-		i := r.index
+		r.handleOrdinalRoute(w, req)
+		return
 
-		if r.Responses == nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("no payloads specified for ordinal endpoint"))
-			return
-		}
-
-		if r.Responses[i].Payload != "" {
-			b, err = ioutil.ReadFile(r.Responses[i].Payload)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
-				return
-			}
-		}
-
-		code = r.Responses[i].Code
-
-		if i < len(r.Responses)-1 {
-			r.index++
-		}
 	case variableRouteType:
-		i := r.index
-
-		if r.Responses == nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("no payloads specified for variable endpoint"))
-			return
-		}
-
-		if r.Responses[i].Payload != "" {
-			b, err = ioutil.ReadFile(r.Responses[i].Payload)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
-				return
-			}
-		}
-
-		code = r.Responses[i].Code
+		r.handleVariableRoute(w, req)
+		return
 
 	default:
-		if r.Response.Payload != "" {
-			b, err = ioutil.ReadFile(r.Response.Payload)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
-				return
-			}
-		}
+		r.handleDefaultRoute(w, req)
+		return
+	}
+}
 
-		code = r.Response.Code
+func (r *Route) handleCORS(w http.ResponseWriter, req *http.Request) {
+	log.Info("responding with cors headers for options request")
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "*, Authorization")
+	w.Header().Set("Access-Control-Max-Age", "60")
+	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0")
+	w.Header().Set("Vary", "Accept-Encoding")
+	w.WriteHeader(http.StatusNoContent)
+
+	return
+}
+
+func (r *Route) handleDefaultRoute(w http.ResponseWriter, req *http.Request) {
+	var b []byte
+	var err error
+
+	if r.Response.Payload != "" {
+		b, err = ioutil.ReadFile(r.Response.Payload)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
+			return
+		}
 	}
 
-	w.WriteHeader(code)
+	w.WriteHeader(r.Response.Code)
+	w.Write(b)
+}
+
+func (r *Route) handleOrdinalRoute(w http.ResponseWriter, req *http.Request) {
+	var b []byte
+	var err error
+
+	i := r.index
+
+	if r.Responses == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("no payloads specified for ordinal endpoint"))
+		return
+	}
+
+	if r.Responses[i].Payload != "" {
+		b, err = ioutil.ReadFile(r.Responses[i].Payload)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
+			return
+		}
+	}
+
+	w.WriteHeader(r.Responses[i].Code)
+	w.Write(b)
+
+	if i < len(r.Responses)-1 {
+		r.index++
+	}
+}
+
+func (r *Route) handleVariableRoute(w http.ResponseWriter, req *http.Request) {
+	var b []byte
+	var err error
+
+	i := r.index
+
+	if r.Responses == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("no payloads specified for variable endpoint"))
+		return
+	}
+
+	if r.Responses[i].Payload != "" {
+		b, err = ioutil.ReadFile(r.Responses[i].Payload)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
+			return
+		}
+	}
+
+	w.WriteHeader(r.Responses[i].Code)
 	w.Write(b)
 }
 
