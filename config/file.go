@@ -86,13 +86,7 @@ func (f *File) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Path == f.Reset {
-		log.Debug("resetting endpoints")
-
-		for k := range f.routesMap {
-			f.routesMap[k].Reset()
-		}
-
-		w.WriteHeader(http.StatusOK)
+		handleReset(w, r, f)
 		return
 	}
 
@@ -124,6 +118,17 @@ func (f *File) getRoute(reqURL *url.URL) (*Route, bool) {
 func handleStatus(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("duty is functioning"))
+}
+
+func handleReset(w http.ResponseWriter, req *http.Request, f *File) {
+	log.Debug("resetting endpoints")
+
+	for k := range f.routesMap {
+		f.routesMap[k].Reset()
+	}
+
+	w.WriteHeader(http.StatusOK)
+	return
 }
 
 func handleSet(w http.ResponseWriter, req *http.Request, f *File) {
