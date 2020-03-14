@@ -45,4 +45,13 @@ routes:
       - code: 404
         payload: "notfound.json"
         id: "404"
-      
+
+  - endpoint: "/v1/verb"
+    type: "verb"
+    responses:
+      - verb: GET
+        code: 200
+        payload: "foo.json"
+      - verb: POST
+        code: 201
+        payload: "newfoo.json"
