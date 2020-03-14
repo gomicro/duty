@@ -94,13 +94,20 @@ func (r *Route) Reset() {
 	r.index = 0
 }
 
-// Set takes name of the route and id of the response, and sets the route to return
-// the specified response if it exists.
-// If no response matches the id specified, the route will not update.
-func (r *Route) Set(name, id string) {
+// Set takes an id of the response desired, and sets the route to return the
+// specified response if it exists. It will return an error if it is setting the
+// response is not possible.
+func (r *Route) Set(id string) error {
+	if r.Type != variableRouteType {
+		return fmt.Errorf("invalid route type")
+	}
+
 	for i, v := range r.Responses {
-		if r.Type == variableRouteType && r.Name == name && v.ID == id {
+		if v.ID == id {
 			r.index = i
+			return nil
 		}
 	}
+
+	return fmt.Errorf("ID not found")
 }
