@@ -24,6 +24,20 @@ type Route struct {
 }
 
 func (r *Route) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "OPTIONS" {
+		log.Info("responding with cors headers for options request")
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "*, Authorization")
+		w.Header().Set("Access-Control-Max-Age", "60")
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0")
+		w.Header().Set("Vary", "Accept-Encoding")
+		w.WriteHeader(http.StatusNoContent)
+
+		return
+	}
+
 	var b []byte
 	var code int
 	var err error
