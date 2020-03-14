@@ -318,5 +318,55 @@ func TestRoute(t *testing.T) {
 				Expect(res.StatusCode).To(Equal(401))
 			})
 		})
+
+		g.Describe("Verb", func() {
+			var f *File
+			var server *httptest.Server
+			var u string
+
+			g.BeforeEach(func() {
+				f, _ = ParseFromFile()
+				server = httptest.NewServer(f)
+				u = fmt.Sprintf("%v%v", server.URL, "/v1/verb")
+			})
+
+			g.AfterEach(func() {
+				server.Close()
+			})
+
+			g.It("should return content based on verb", func() {
+				res, err := http.Get(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				firstb, err := ioutil.ReadAll(res.Body)
+				Expect(err).To(BeNil())
+				Expect(string(firstb)).To(ContainSubstring("here lies a foo"))
+				Expect(string(firstb)).To(ContainSubstring("git to the bar"))
+				Expect(string(firstb)).To(ContainSubstring("let's get the baz back together"))
+
+				res, err = http.Post(u, "application/json", nil)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				secondb, err := ioutil.ReadAll(res.Body)
+				Expect(err).To(BeNil())
+				Expect(firstb).NotTo(Equal(secondb))
+				Expect(string(secondb)).To(ContainSubstring("new foo"))
+				Expect(string(secondb)).To(ContainSubstring("here lies a foo"))
+				Expect(string(secondb)).To(ContainSubstring("new bar"))
+				Expect(string(secondb)).To(ContainSubstring("git to the bar"))
+				Expect(string(secondb)).To(ContainSubstring("new baz"))
+				Expect(string(secondb)).To(ContainSubstring("let's get the baz back together"))
+			})
+
+			g.It("should return a 405 on a verb not matched", func() {
+				res, err := http.Head(u)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				Expect(res.StatusCode).To(Equal(405))
+			})
+		})
 	})
 }
