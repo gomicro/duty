@@ -11,6 +11,7 @@ const (
 	ordinalRouteType  = "ordinal"
 	staticRouteType   = "static"
 	variableRouteType = "variable"
+	verbRouteType     = "verb"
 )
 
 // Route represents a given endpoint and the kind of response it should return
@@ -36,6 +37,10 @@ func (r *Route) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	case variableRouteType:
 		r.handleVariableRoute(w, req)
+		return
+
+	case verbRouteType:
+		r.handleVerbRoute(w, req)
 		return
 
 	default:
@@ -127,6 +132,32 @@ func (r *Route) handleVariableRoute(w http.ResponseWriter, req *http.Request) {
 
 	w.WriteHeader(r.Responses[i].Code)
 	w.Write(b)
+}
+
+func (r *Route) handleVerbRoute(w http.ResponseWriter, req *http.Request) {
+	for i := range r.Responses {
+		if strings.ToUpper(r.Responses[i].Verb) == req.Method {
+			var b []byte
+			var err error
+
+			if r.Responses[i].Payload != "" {
+				b, err = ioutil.ReadFile(r.Responses[i].Payload)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
+					return
+				}
+			}
+
+			w.WriteHeader(r.Responses[i].Code)
+			w.Write(b)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.Write([]byte("method not defined in config"))
+	return
 }
 
 // Reset returns the internal index of the route to 0
