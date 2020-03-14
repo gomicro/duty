@@ -16,6 +16,35 @@ func TestRoute(t *testing.T) {
 	RegisterFailHandler(func(m string, _ ...int) { g.Fail(m) })
 
 	g.Describe("Routes", func() {
+		g.Describe("CORS", func() {
+			g.It("should respond to CORS option requests", func() {
+				f, _ := ParseFromFile()
+
+				server := httptest.NewServer(f)
+				defer server.Close()
+
+				u := fmt.Sprintf("%v%v", server.URL, "/v1/static")
+
+				c := &http.Client{}
+
+				req, err := http.NewRequest("OPTIONS", u, nil)
+				Expect(err).To(BeNil())
+
+				res, err := c.Do(req)
+				Expect(err).To(BeNil())
+				defer res.Body.Close()
+
+				Expect(res.Header.Get("Access-Control-Allow-Origin")).To(Equal("*"))
+				Expect(res.Header.Get("Access-Control-Allow-Methods")).To(Equal("*"))
+				Expect(res.Header.Get("Access-Control-Allow-Headers")).To(Equal("*, Authorization"))
+				Expect(res.Header.Get("Access-Control-Max-Age")).To(Equal("60"))
+				Expect(res.Header.Get("Cache-Control")).To(Equal("no-store, no-cache, must-revalidate, post-check=0, pre-check=0"))
+				Expect(res.Header.Get("Vary")).To(Equal("Accept-Encoding"))
+
+				Expect(res.StatusCode).To(Equal(http.StatusNoContent))
+			})
+		})
+
 		g.Describe("Static", func() {
 			g.It("should return static content for a static route", func() {
 				f, _ := ParseFromFile()
