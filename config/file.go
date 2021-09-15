@@ -99,7 +99,7 @@ func (f *File) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !found {
 		log.Errorf("route not found for url path: %v", r.URL)
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("path not found"))
+		w.Write([]byte("path not found")) //nolint:errcheck
 		return
 	}
 
@@ -117,7 +117,7 @@ func (f *File) getRoute(reqURL *url.URL) (*Route, bool) {
 
 func handleStatus(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("duty is functioning"))
+	w.Write([]byte("duty is functioning")) //nolint:errcheck
 }
 
 func handleReset(w http.ResponseWriter, req *http.Request, f *File) {
@@ -128,7 +128,6 @@ func handleReset(w http.ResponseWriter, req *http.Request, f *File) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	return
 }
 
 func handleSet(w http.ResponseWriter, req *http.Request, f *File) {
@@ -139,7 +138,7 @@ func handleSet(w http.ResponseWriter, req *http.Request, f *File) {
 
 	if name == "" || id == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("name and id are required query params"))
+		w.Write([]byte("name and id are required query params")) //nolint:errcheck
 		return
 	}
 
@@ -148,7 +147,7 @@ func handleSet(w http.ResponseWriter, req *http.Request, f *File) {
 			err := f.routesMap[k].Set(id)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("failed to set route: %v", err.Error())))
+				w.Write([]byte(fmt.Sprintf("failed to set route: %v", err.Error()))) //nolint:errcheck
 				return
 			}
 
@@ -158,6 +157,5 @@ func handleSet(w http.ResponseWriter, req *http.Request, f *File) {
 	}
 
 	w.WriteHeader(http.StatusBadRequest)
-	w.Write([]byte("no route found"))
-	return
+	w.Write([]byte("no route found")) //nolint:errcheck
 }

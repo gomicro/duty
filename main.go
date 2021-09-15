@@ -29,5 +29,8 @@ func main() {
 	configure()
 
 	log.Infof("Listening on %v:%v", "0.0.0.0", "4567")
-	http.ListenAndServe("0.0.0.0:4567", conf)
+	err := http.ListenAndServe("0.0.0.0:4567", conf)
+	if err != nil {
+		log.Errorf("server error: %v", err.Error())
+	}
 }

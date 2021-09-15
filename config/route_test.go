@@ -202,7 +202,8 @@ func TestRoute(t *testing.T) {
 				Expect(string(firstb)).NotTo(Equal(string(secondb)))
 
 				r := fmt.Sprintf("%v%v", server.URL, "/duty/reset")
-				http.Get(r)
+				_, err = http.Get(r)
+				Expect(err).To(BeNil())
 
 				res, err = http.Get(u)
 				Expect(err).To(BeNil())

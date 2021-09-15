@@ -9,7 +9,6 @@ import (
 
 const (
 	ordinalRouteType  = "ordinal"
-	staticRouteType   = "static"
 	variableRouteType = "variable"
 	verbRouteType     = "verb"
 )
@@ -59,8 +58,6 @@ func (r *Route) handleCORS(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0")
 	w.Header().Set("Vary", "Accept-Encoding")
 	w.WriteHeader(http.StatusNoContent)
-
-	return
 }
 
 func (r *Route) handleDefaultRoute(w http.ResponseWriter, req *http.Request) {
@@ -71,13 +68,13 @@ func (r *Route) handleDefaultRoute(w http.ResponseWriter, req *http.Request) {
 		b, err = ioutil.ReadFile(r.Response.Payload)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
+			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error()))) //nolint:errcheck
 			return
 		}
 	}
 
 	w.WriteHeader(r.Response.Code)
-	w.Write(b)
+	w.Write(b) //nolint:errcheck
 }
 
 func (r *Route) handleOrdinalRoute(w http.ResponseWriter, req *http.Request) {
@@ -88,7 +85,7 @@ func (r *Route) handleOrdinalRoute(w http.ResponseWriter, req *http.Request) {
 
 	if r.Responses == nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("no payloads specified for ordinal endpoint"))
+		w.Write([]byte("no payloads specified for ordinal endpoint")) //nolint:errcheck
 		return
 	}
 
@@ -96,13 +93,13 @@ func (r *Route) handleOrdinalRoute(w http.ResponseWriter, req *http.Request) {
 		b, err = ioutil.ReadFile(r.Responses[i].Payload)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
+			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error()))) //nolint:errcheck
 			return
 		}
 	}
 
 	w.WriteHeader(r.Responses[i].Code)
-	w.Write(b)
+	w.Write(b) //nolint:errcheck
 
 	if i < len(r.Responses)-1 {
 		r.index++
@@ -117,7 +114,7 @@ func (r *Route) handleVariableRoute(w http.ResponseWriter, req *http.Request) {
 
 	if r.Responses == nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("no payloads specified for variable endpoint"))
+		w.Write([]byte("no payloads specified for variable endpoint")) //nolint:errcheck
 		return
 	}
 
@@ -125,13 +122,13 @@ func (r *Route) handleVariableRoute(w http.ResponseWriter, req *http.Request) {
 		b, err = ioutil.ReadFile(r.Responses[i].Payload)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
+			w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error()))) //nolint:errcheck
 			return
 		}
 	}
 
 	w.WriteHeader(r.Responses[i].Code)
-	w.Write(b)
+	w.Write(b) //nolint:errcheck
 }
 
 func (r *Route) handleVerbRoute(w http.ResponseWriter, req *http.Request) {
@@ -144,20 +141,19 @@ func (r *Route) handleVerbRoute(w http.ResponseWriter, req *http.Request) {
 				b, err = ioutil.ReadFile(r.Responses[i].Payload)
 				if err != nil {
 					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error())))
+					w.Write([]byte(fmt.Sprintf("failed to read payload: %v", err.Error()))) //nolint:errcheck
 					return
 				}
 			}
 
 			w.WriteHeader(r.Responses[i].Code)
-			w.Write(b)
+			w.Write(b) //nolint:errcheck
 			return
 		}
 	}
 
 	w.WriteHeader(http.StatusMethodNotAllowed)
-	w.Write([]byte("method not defined in config"))
-	return
+	w.Write([]byte("method not defined in config")) //nolint:errcheck
 }
 
 // Reset returns the internal index of the route to 0
