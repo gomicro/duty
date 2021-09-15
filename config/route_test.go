@@ -7,12 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	. "github.com/franela/goblin"
+	"github.com/franela/goblin"
 	. "github.com/onsi/gomega"
 )
 
 func TestRoute(t *testing.T) {
-	g := Goblin(t)
+	g := goblin.Goblin(t)
 	RegisterFailHandler(func(m string, _ ...int) { g.Fail(m) })
 
 	g.Describe("Routes", func() {
@@ -202,7 +202,8 @@ func TestRoute(t *testing.T) {
 				Expect(string(firstb)).NotTo(Equal(string(secondb)))
 
 				r := fmt.Sprintf("%v%v", server.URL, "/duty/reset")
-				http.Get(r)
+				_, err = http.Get(r)
+				Expect(err).To(BeNil())
 
 				res, err = http.Get(u)
 				Expect(err).To(BeNil())
