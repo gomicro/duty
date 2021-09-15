@@ -1,0 +1,31 @@
+
+builds:
+- env:
+    - CGO_ENABLED=0
+
+  ldflags:
+    - -X "github.com/gomicro/duty/cmd.Version={{.Env.VERSION}}"
+    - "-s -w"
+
+  goos:
+    - darwin
+    - windows
+    - linux
+
+  ignore:
+    - goos: darwin
+      goarch: 386
+
+archives:
+  -
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+
+dockers:
+  -
+    goos: linux
+
+    goarch: amd64
+
+    image_templates:
+      - "gomicro/duty:latest"
+      - "gomicro/duty:{{ .Env.VERSION }}"
