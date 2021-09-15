@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"net/http/httputil"
 	"os"
 
 	"github.com/gomicro/duty/config"
@@ -10,8 +9,7 @@ import (
 )
 
 var (
-	conf    *config.File
-	proxies map[string]*httputil.ReverseProxy
+	conf *config.File
 )
 
 func configure() {
